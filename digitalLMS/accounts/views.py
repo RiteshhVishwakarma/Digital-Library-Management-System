@@ -6,7 +6,7 @@ def register(request):
     """
     Handle user registration.
     """
-    pass
+    return render(request, 'accounts/register.html')
 
 
 def login_view(request):
