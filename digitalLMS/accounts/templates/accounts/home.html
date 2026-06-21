@@ -6,80 +6,410 @@
     <title>Home - Digital Library Management System</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+        }
+        
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
         }
+        
+        /* Navbar Styles */
         .navbar {
-            background: rgba(255, 255, 255, 0.95) !important;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: white !important;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
         }
-        .main-content {
-            padding: 3rem 0;
-        }
-        .welcome-card {
-            background: white;
-            border-radius: 15px;
-            padding: 3rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            margin-top: 2rem;
-        }
-        .welcome-card h1 {
-            color: #667eea;
+        
+        .navbar-brand {
+            font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 1rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .welcome-card p {
-            color: #6c757d;
-            font-size: 1.1rem;
+        
+        .navbar-brand i {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .btn-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        
+        .nav-link {
+            font-weight: 500;
+            color: #495057 !important;
+            margin: 0 0.5rem;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+        
+        .btn-login {
+            background: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-register {
+            background: var(--primary-gradient);
             border: none;
             color: white;
-            padding: 0.75rem 2rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
             font-weight: 600;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
         }
-        .btn-gradient:hover {
+        
+        .btn-register:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
             color: white;
         }
+        
+        /* Hero Section */
+        .hero-section {
+            background: var(--primary-gradient);
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            color: white;
+        }
+        
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .hero-content p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+        
+        .hero-buttons .btn {
+            padding: 0.875rem 2.5rem;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            font-weight: 600;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-hero-primary {
+            background: white;
+            color: var(--primary-color);
+            border: none;
+        }
+        
+        .btn-hero-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            color: var(--primary-color);
+        }
+        
+        .btn-hero-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .btn-hero-outline:hover {
+            background: white;
+            color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .hero-image {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-image i {
+            font-size: 20rem;
+            color: rgba(255, 255, 255, 0.2);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+        
+        /* Features Section */
+        .features-section {
+            padding: 5rem 0;
+            background: #f8f9fa;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .feature-card h3 {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card p {
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+        
+        /* About Section */
+        .about-section {
+            background: white;
+        }
+        
+        .about-image i {
+            font-size: 20rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .about-content h2 {
+            color: #333;
+        }
+        
+        .about-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        .stat-box {
+            padding: 1rem;
+        }
+        
+        /* Call to Action Section */
+        .cta-section {
+            background: var(--primary-gradient);
+            padding: 5rem 0;
+        }
+        
+        .cta-box {
+            text-align: center;
+        }
+        
+        .cta-buttons .btn {
+            padding: 0.875rem 2rem;
+            font-weight: 600;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-buttons .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Footer Section */
+        .footer-section {
+            background: #f8f9fa;
+            padding: 3rem 0 1rem;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icon:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Alert Messages */
         .alert {
             border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* User Dashboard Section */
+        .dashboard-section {
+            padding: 3rem 0;
+        }
+        
+        .user-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            margin: 0 auto 1.5rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-content p {
+                font-size: 1.1rem;
+            }
+            
+            .hero-image i {
+                font-size: 10rem;
+            }
+            
+            .hero-buttons .btn {
+                display: block;
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+            
+            .about-image i {
+                font-size: 10rem;
+            }
+            
+            .cta-buttons .btn {
+                display: block;
+                width: 100%;
+                margin: 0.5rem 0;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'accounts:home' %}">
-                📚 Digital Library
+            <a class="navbar-brand" href="{% url 'accounts:home' %}">
+                <i class="bi bi-book-fill"></i> Digital Library
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <span class="nav-link">Welcome, <strong>{{ user.username }}</strong></span>
+                            <span class="nav-link">
+                                <i class="bi bi-person-circle"></i> Welcome, <strong>{{ user.username }}</strong>
+                            </span>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-outline-danger btn-sm ms-2" href="{% url 'accounts:logout' %}">
-                                Logout
+                            <a class="btn btn-outline-danger btn-sm ms-2" href="{% url 'accounts:logout' %}">
+                                <i class="bi bi-box-arrow-right"></i> Logout
                             </a>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+                            <a class="nav-link" href="#features">Features</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:register' %}">Register</a>
+                            <a class="nav-link" href="#about">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-login ms-3" href="{% url 'accounts:login' %}">
+                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-register ms-2" href="{% url 'accounts:register' %}">
+                                <i class="bi bi-person-plus"></i> Register
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -87,46 +417,300 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container main-content">
-        <!-- Django Messages -->
-        {% if messages %}
+    <!-- Django Messages -->
+    {% if messages %}
+        <div class="container mt-3">
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
-        {% endif %}
+        </div>
+    {% endif %}
 
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="welcome-card text-center">
-                    {% if user.is_authenticated %}
-                        <h1>Welcome to Digital Library Management System!</h1>
-                        <p class="lead mb-4">Hello, {{ user.username }}! You are successfully logged in.</p>
-                        <p>Your email: <strong>{{ user.email }}</strong></p>
-                        <div class="mt-4">
-                            <a href="{% url 'accounts:logout' %}" class="btn btn-gradient">
-                                Logout
+    {% if user.is_authenticated %}
+        <!-- User Dashboard Section -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-12">
+                        <div class="user-card text-center">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <h1 class="mb-3" style="color: var(--primary-color);">Welcome Back, {{ user.username }}!</h1>
+                            <p class="lead text-muted mb-4">
+                                <i class="bi bi-envelope-fill"></i> {{ user.email }}
+                            </p>
+                            <p class="text-muted mb-4">You are successfully logged into the Digital Library Management System</p>
+                            <a href="{% url 'accounts:logout' %}" class="btn btn-register btn-lg">
+                                <i class="bi bi-box-arrow-right"></i> Logout
                             </a>
                         </div>
-                    {% else %}
-                        <h1>Welcome to Digital Library Management System!</h1>
-                        <p class="lead mb-4">Please login or register to continue.</p>
-                        <div class="mt-4">
-                            <a href="{% url 'accounts:login' %}" class="btn btn-gradient me-3">
-                                Login
-                            </a>
-                            <a href="{% url 'accounts:register' %}" class="btn btn-outline-secondary">
-                                Register
-                            </a>
-                        </div>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
+        </section>
+    {% else %}
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 col-md-12">
+                        <div class="hero-content">
+                            <h1 class="animate__animated animate__fadeInUp">
+                                Welcome to Digital Library Management System
+                            </h1>
+                            <p class="animate__animated animate__fadeInUp animate__delay-1s">
+                                Access thousands of books, manage your reading list, and explore a world of knowledge at your fingertips.
+                            </p>
+                            <div class="hero-buttons">
+                                <a href="{% url 'accounts:register' %}" class="btn btn-hero-primary">
+                                    <i class="bi bi-person-plus"></i> Get Started
+                                </a>
+                                <a href="{% url 'accounts:login' %}" class="btn btn-hero-outline">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-12 text-center d-none d-lg-block">
+                        <div class="hero-image">
+                            <i class="bi bi-book-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section" id="features">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold mb-3">Why Choose Our Library?</h2>
+                    <p class="text-muted">Discover the features that make our digital library stand out</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="bi bi-book"></i>
+                            </div>
+                            <h3>Vast Collection</h3>
+                            <p>Access thousands of books across various genres and categories</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="bi bi-search"></i>
+                            </div>
+                            <h3>Easy Search</h3>
+                            <p>Find your favorite books quickly with our powerful search engine</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="bi bi-bookmark-heart"></i>
+                            </div>
+                            <h3>Personal Library</h3>
+                            <p>Create and manage your own reading list and bookmarks</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <h3>Reading History</h3>
+                            <p>Track your reading progress and history effortlessly</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <h3>Secure & Private</h3>
+                            <p>Your data is protected with industry-standard security</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="bi bi-phone"></i>
+                            </div>
+                            <h3>Mobile Friendly</h3>
+                            <p>Access your library anywhere, anytime on any device</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="about-section py-5" id="about">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <div class="about-image">
+                            <i class="bi bi-journal-bookmark-fill"></i>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="about-content">
+                            <h2 class="fw-bold mb-4">About Digital Library Management System</h2>
+                            <p class="text-muted mb-4">
+                                Our Digital Library Management System is a comprehensive platform designed to revolutionize 
+                                the way you access, manage, and interact with digital books and resources. Built with modern 
+                                technology and user experience in mind, we provide a seamless reading experience for everyone.
+                            </p>
+                            
+                            <div class="about-features mb-4">
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="about-icon me-3">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-1">User-Friendly Interface</h5>
+                                        <p class="text-muted mb-0">Intuitive design that makes browsing and reading enjoyable for all users.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="about-icon me-3">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-1">Advanced Technology</h5>
+                                        <p class="text-muted mb-0">Built using Django framework ensuring robust performance and security.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="about-icon me-3">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-1">Continuous Improvement</h5>
+                                        <p class="text-muted mb-0">Regular updates and new features based on user feedback and needs.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-start">
+                                    <div class="about-icon me-3">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-1">Community Driven</h5>
+                                        <p class="text-muted mb-0">Join thousands of readers who trust us for their digital reading needs.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="about-stats">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <div class="stat-box">
+                                            <h3 class="fw-bold mb-0" style="color: var(--primary-color);">10K+</h3>
+                                            <p class="text-muted small mb-0">Books</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-box">
+                                            <h3 class="fw-bold mb-0" style="color: var(--primary-color);">5K+</h3>
+                                            <p class="text-muted small mb-0">Users</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-box">
+                                            <h3 class="fw-bold mb-0" style="color: var(--primary-color);">50+</h3>
+                                            <p class="text-muted small mb-0">Categories</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action Section -->
+        <section class="cta-section">
+            <div class="container">
+                <div class="cta-box">
+                    <h2 class="fw-bold text-white mb-3">Ready to Start Your Reading Journey?</h2>
+                    <p class="text-white mb-4 opacity-90">
+                        Join our community of readers today and unlock access to thousands of books
+                    </p>
+                    <div class="cta-buttons">
+                        <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg me-3">
+                            <i class="bi bi-person-plus"></i> Create Account
+                        </a>
+                        <a href="#features" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-info-circle"></i> Learn More
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5 class="fw-bold mb-3" style="color: var(--primary-color);">
+                        <i class="bi bi-book-fill"></i> Digital Library
+                    </h5>
+                    <p class="text-muted">
+                        Your gateway to unlimited knowledge and reading experiences. 
+                        Access thousands of books anytime, anywhere.
+                    </p>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4 mb-lg-0">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{% url 'accounts:home' %}" class="text-muted text-decoration-none">Home</a></li>
+                        <li class="mb-2"><a href="#features" class="text-muted text-decoration-none">Features</a></li>
+                        <li class="mb-2"><a href="#about" class="text-muted text-decoration-none">About</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h6 class="fw-bold mb-3">Account</h6>
+                    <ul class="list-unstyled">
+                        {% if not user.is_authenticated %}
+                            <li class="mb-2"><a href="{% url 'accounts:login' %}" class="text-muted text-decoration-none">Login</a></li>
+                            <li class="mb-2"><a href="{% url 'accounts:register' %}" class="text-muted text-decoration-none">Register</a></li>
+                        {% else %}
+                            <li class="mb-2"><a href="{% url 'accounts:home' %}" class="text-muted text-decoration-none">Dashboard</a></li>
+                            <li class="mb-2"><a href="{% url 'accounts:logout' %}" class="text-muted text-decoration-none">Logout</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-3">Connect With Us</h6>
+                    <div class="social-links">
+                        <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p class="text-muted mb-0">
+                    &copy; 2026 Digital Library Management System. All rights reserved.
+                </p>
+            </div>
         </div>
-    </div>
+    </footer>
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
