@@ -13,7 +13,7 @@ def login_view(request):
     """
     Handle user login.
     """
-    pass
+    return render(request, 'accounts/login.html')
 
 
 def logout_view(request):
