@@ -1,7 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib import messages
-from .forms import RegistrationForm
+from django.contrib.auth.decorators import login_required
+from .forms import RegistrationForm, LoginForm
+
+
+def home(request):
+    """
+    Home page view.
+    """
+    return render(request, 'accounts/home.html')
 
 
 def register(request):
@@ -33,11 +41,42 @@ def login_view(request):
     """
     Handle user login.
     """
-    return render(request, 'accounts/login.html')
+    # Redirect if user is already authenticated
+    if request.user.is_authenticated:
+        return redirect('accounts:home')
+    
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, f'Welcome back, {user.username}!')
+            
+            # Redirect to next parameter or home page
+            next_url = request.GET.get('next')
+            if next_url:
+                return redirect(next_url)
+            return redirect('accounts:home')
+        else:
+            # Display form errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, error)
+                    else:
+                        messages.error(request, f'{field.capitalize()}: {error}')
+    else:
+        form = LoginForm()
+    
+    return render(request, 'accounts/login.html', {'form': form})
 
 
+@login_required
 def logout_view(request):
     """
     Handle user logout.
     """
-    pass
+    username = request.user.username
+    logout(request)
+    messages.success(request, f'You have been logged out successfully, {username}!')
+    return redirect('accounts:home')

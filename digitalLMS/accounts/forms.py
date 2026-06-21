@@ -1,6 +1,55 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.contrib.auth import authenticate
+
+
+class LoginForm(forms.Form):
+    """
+    Form for user login.
+    """
+    username = forms.CharField(
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your username'
+        })
+    )
+    
+    password = forms.CharField(
+        required=True,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your password'
+        })
+    )
+    
+    def clean(self):
+        """
+        Validate user credentials.
+        """
+        cleaned_data = super().clean()
+        username = cleaned_data.get('username')
+        password = cleaned_data.get('password')
+        
+        if username and password:
+            user = authenticate(username=username, password=password)
+            if user is None:
+                raise ValidationError('Invalid username or password.')
+            elif not user.is_active:
+                raise ValidationError('This account is inactive.')
+            
+            # Store authenticated user for later use
+            self.user = user
+        
+        return cleaned_data
+    
+    def get_user(self):
+        """
+        Return the authenticated user.
+        """
+        return getattr(self, 'user', None)
 
 
 class RegistrationForm(forms.Form):
