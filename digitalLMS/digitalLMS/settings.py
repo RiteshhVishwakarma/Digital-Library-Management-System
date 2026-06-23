@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    'books',
 ]
 
 MIDDLEWARE = [
@@ -119,5 +120,5 @@ STATIC_URL = 'static/'
 
 # Authentication settings
 LOGIN_URL = 'accounts:login'
-LOGIN_REDIRECT_URL = 'accounts:home'
+LOGIN_REDIRECT_URL = 'accounts:dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:home'

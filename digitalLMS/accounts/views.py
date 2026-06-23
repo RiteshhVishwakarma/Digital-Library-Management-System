@@ -12,6 +12,14 @@ def home(request):
     return render(request, 'accounts/home.html')
 
 
+@login_required
+def dashboard(request):
+    """
+    User dashboard view.
+    """
+    return render(request, 'accounts/dashboard.html')
+
+
 def register(request):
     """
     Handle user registration.
@@ -43,7 +51,7 @@ def login_view(request):
     """
     # Redirect if user is already authenticated
     if request.user.is_authenticated:
-        return redirect('accounts:home')
+        return redirect('accounts:dashboard')
     
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -52,11 +60,11 @@ def login_view(request):
             login(request, user)
             messages.success(request, f'Welcome back, {user.username}!')
             
-            # Redirect to next parameter or home page
+            # Redirect to next parameter or dashboard
             next_url = request.GET.get('next')
             if next_url:
                 return redirect(next_url)
-            return redirect('accounts:home')
+            return redirect('accounts:dashboard')
         else:
             # Display form errors
             for field, errors in form.errors.items():
