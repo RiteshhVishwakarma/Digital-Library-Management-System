@@ -234,6 +234,116 @@
         
         .empty-state p {
             color: #adb5bd;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-clear-search {
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-clear-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        /* Search Section */
+        .search-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 1.25rem;
+            pointer-events: none;
+        }
+        
+        .search-input {
+            padding: 0.875rem 3rem 0.875rem 3.5rem;
+            border: 2px solid #e9ecef;
+            border-radius: 50px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+            outline: none;
+        }
+        
+        .clear-search {
+            position: absolute;
+            right: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .clear-search:hover {
+            color: #dc3545;
+        }
+        
+        .btn-search {
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            padding: 0.875rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .search-info {
+            margin-top: 1rem;
+            padding: 0.75rem 1.25rem;
+            background: #e7f3ff;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 5px;
+            color: #004085;
+            display: inline-block;
+        }
+        
+        .search-info i {
+            color: var(--primary-color);
+            margin-right: 0.5rem;
         }
         
         /* Alert Messages */
@@ -260,6 +370,14 @@
             
             .book-icon {
                 font-size: 2.5rem;
+            }
+            
+            .search-form {
+                flex-direction: column;
+            }
+            
+            .btn-search {
+                width: 100%;
             }
         }
     </style>
@@ -327,8 +445,36 @@
             <h1><i class="bi bi-book"></i> Browse Our Collection</h1>
             <p>Discover and explore thousands of books in our library</p>
             <div class="stats-badge">
-                <i class="bi bi-collection"></i> {{ total_books }} Book{{ total_books|pluralize }} Available
+                <i class="bi bi-collection"></i> {{ total_books }} Book{{ total_books|pluralize }} 
+                {% if search_query %}matching "{{ search_query }}"{% else %}Available{% endif %}
             </div>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="container mb-4">
+        <div class="search-section">
+            <form method="GET" action="{% url 'books:book_list' %}" class="search-form">
+                <div class="search-input-wrapper">
+                    <i class="bi bi-search search-icon"></i>
+                    <input 
+                        type="text" 
+                        name="q" 
+                        class="form-control search-input" 
+                        placeholder="Search by title or author..." 
+                        value="{{ search_query }}"
+                        autocomplete="off"
+                    >
+                    {% if search_query %}
+                        <a href="{% url 'books:book_list' %}" class="clear-search" title="Clear search">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn btn-search">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </form>
         </div>
     </div>
 
@@ -387,13 +533,22 @@
         {% else %}
             <!-- Empty State -->
             <div class="empty-state">
-                <i class="bi bi-inbox"></i>
-                <h3>No Books Available</h3>
-                <p>There are currently no books in the library. Please check back later.</p>
-                {% if user.is_staff %}
-                    <a href="/admin/books/book/add/" class="btn btn-view-details mt-3">
-                        <i class="bi bi-plus-circle"></i> Add Books
+                <i class="bi bi-{% if search_query %}search{% else %}inbox{% endif %}"></i>
+                {% if search_query %}
+                    <h3>No Books Found</h3>
+                    <p>We couldn't find any books matching "{{ search_query }}"</p>
+                    <p class="text-muted small">Try different keywords or browse all books</p>
+                    <a href="{% url 'books:book_list' %}" class="btn-clear-search">
+                        <i class="bi bi-arrow-left"></i> View All Books
                     </a>
+                {% else %}
+                    <h3>No Books Available</h3>
+                    <p>There are currently no books in the library. Please check back later.</p>
+                    {% if user.is_staff %}
+                        <a href="/admin/books/book/add/" class="btn-clear-search mt-3">
+                            <i class="bi bi-plus-circle"></i> Add Books
+                        </a>
+                    {% endif %}
                 {% endif %}
             </div>
         {% endif %}
