@@ -231,6 +231,26 @@
             transform: translateY(-2px);
         }
         
+        .btn-danger-custom {
+            background: white;
+            border: 2px solid #dc3545;
+            color: #dc3545;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .btn-danger-custom:hover {
+            background: #dc3545;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
         .quantity-display {
             display: flex;
             align-items: center;
@@ -495,6 +515,14 @@
 
                         <!-- Action Buttons -->
                         <div class="action-buttons mt-4">
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'books:edit_book' book.pk %}" class="btn btn-primary-custom">
+                                    <i class="bi bi-pencil-square"></i> Edit Book
+                                </a>
+                                <a href="{% url 'books:delete_book' book.pk %}" class="btn btn-danger-custom">
+                                    <i class="bi bi-trash"></i> Delete Book
+                                </a>
+                            {% endif %}
                             <a href="{% url 'books:book_list' %}" class="btn btn-secondary-custom">
                                 <i class="bi bi-arrow-left"></i> Back to Catalog
                             </a>

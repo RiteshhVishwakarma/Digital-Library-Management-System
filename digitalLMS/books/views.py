@@ -69,3 +69,57 @@ def add_book(request):
         'page_title': 'Add New Book'
     }
     return render(request, 'books/add_book.html', context)
+
+
+@login_required
+def edit_book(request, pk):
+    """
+    Edit an existing book.
+    """
+    book = get_object_or_404(Book, pk=pk)
+    
+    if request.method == 'POST':
+        form = BookForm(request.POST, instance=book)
+        if form.is_valid():
+            book = form.save()
+            messages.success(
+                request,
+                f'Book "{book.title}" has been updated successfully!'
+            )
+            return redirect('books:book_detail', pk=book.pk)
+        else:
+            messages.error(
+                request,
+                'Please correct the errors below.'
+            )
+    else:
+        form = BookForm(instance=book)
+    
+    context = {
+        'form': form,
+        'book': book,
+        'page_title': 'Edit Book'
+    }
+    return render(request, 'books/edit_book.html', context)
+
+
+@login_required
+def delete_book(request, pk):
+    """
+    Delete a book with confirmation.
+    """
+    book = get_object_or_404(Book, pk=pk)
+    
+    if request.method == 'POST':
+        book_title = book.title
+        book.delete()
+        messages.success(
+            request,
+            f'Book "{book_title}" has been deleted successfully!'
+        )
+        return redirect('books:book_list')
+    
+    context = {
+        'book': book
+    }
+    return render(request, 'books/delete_book.html', context)

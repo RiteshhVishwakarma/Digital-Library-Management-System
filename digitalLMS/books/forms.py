@@ -75,8 +75,12 @@ class BookForm(forms.ModelForm):
             raise forms.ValidationError('ISBN must contain only digits.')
         
         # Check uniqueness (only for new books, not when editing)
-        if not self.instance.pk:  # Only check for new instances
+        if not self.instance.pk:  # New book
             if Book.objects.filter(isbn=isbn).exists():
+                raise forms.ValidationError('A book with this ISBN already exists.')
+        else:  # Editing existing book
+            # Check if another book (not this one) has this ISBN
+            if Book.objects.filter(isbn=isbn).exclude(pk=self.instance.pk).exists():
                 raise forms.ValidationError('A book with this ISBN already exists.')
         
         return isbn
