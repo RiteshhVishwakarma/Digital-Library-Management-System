@@ -1,6 +1,9 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Book
+from .forms import BookForm
 
 
 def book_list(request):
@@ -37,3 +40,32 @@ def book_detail(request, pk):
         'book': book
     }
     return render(request, 'books/book_detail.html', context)
+
+
+@login_required
+def add_book(request):
+    """
+    Create a new book.
+    """
+    if request.method == 'POST':
+        form = BookForm(request.POST)
+        if form.is_valid():
+            book = form.save()
+            messages.success(
+                request,
+                f'Book "{book.title}" has been added successfully!'
+            )
+            return redirect('books:book_list')
+        else:
+            messages.error(
+                request,
+                'Please correct the errors below.'
+            )
+    else:
+        form = BookForm()
+    
+    context = {
+        'form': form,
+        'page_title': 'Add New Book'
+    }
+    return render(request, 'books/add_book.html', context)
