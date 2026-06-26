@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
@@ -91,24 +91,72 @@ def issue_book(request):
 @librarian_required
 def transaction_list(request):
     """
-    Display list of all borrow transactions.
+    Display list of all borrow transactions with search and filter functionality.
     Only accessible to librarians.
     """
+    # Get search query and filter parameters from GET request
+    search_query = request.GET.get('q', '').strip()
+    status_filter = request.GET.get('status', 'All').strip()
+    
+    # Start with all transactions
     transactions = BorrowTransaction.objects.select_related(
         'member', 'member__profile', 'book'
     ).all()
     
-    # Update overdue status
+    # Update overdue status for all borrowed transactions
     for trans in transactions:
         if trans.status == 'Borrowed' and trans.is_overdue():
             trans.status = 'Overdue'
             trans.save()
     
+    # Apply search filter if query exists
+    if search_query:
+        from django.db.models import Q
+        transactions = transactions.filter(
+            Q(member__username__icontains=search_query) |
+            Q(book__title__icontains=search_query)
+        )
+    
+    # Apply status filter
+    if status_filter and status_filter != 'All':
+        transactions = transactions.filter(status=status_filter)
+    
+    # Calculate statistics (before filtering, use all transactions)
+    all_transactions = BorrowTransaction.objects.all()
+    
     context = {
         'transactions': transactions,
-        'total_transactions': transactions.count(),
-        'active_borrows': transactions.filter(status='Borrowed').count(),
-        'overdue_count': transactions.filter(status='Overdue').count(),
+        'total_transactions': all_transactions.count(),
+        'active_borrows': all_transactions.filter(status='Borrowed').count(),
+        'overdue_count': all_transactions.filter(status='Overdue').count(),
+        'filtered_count': transactions.count(),
+        'search_query': search_query,
+        'status_filter': status_filter,
         'page_title': 'Transaction History'
     }
     return render(request, 'transactions/transaction_list.html', context)
+
+
+@librarian_required
+def transaction_detail(request, pk):
+    """
+    Display detailed information about a specific transaction.
+    Only accessible to librarians.
+    """
+    transaction_obj = get_object_or_404(
+        BorrowTransaction.objects.select_related(
+            'member', 'member__profile', 'book'
+        ),
+        pk=pk
+    )
+    
+    # Update overdue status if needed
+    if transaction_obj.status == 'Borrowed' and transaction_obj.is_overdue():
+        transaction_obj.status = 'Overdue'
+        transaction_obj.save()
+    
+    context = {
+        'transaction': transaction_obj,
+        'page_title': f'Transaction #{transaction_obj.id}'
+    }
+    return render(request, 'transactions/transaction_detail.html', context)

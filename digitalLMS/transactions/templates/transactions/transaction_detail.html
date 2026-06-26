@@ -1,0 +1,432 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - Digital Library</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .main-content {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+        .status-badge {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 25px;
+            display: inline-block;
+        }
+        .status-borrowed {
+            background-color: #0dcaf0;
+            color: #000;
+        }
+        .status-returned {
+            background-color: #198754;
+            color: #fff;
+        }
+        .status-overdue {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .info-card {
+            border-left: 4px solid;
+            transition: transform 0.2s;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+        }
+        .info-card.transaction {
+            border-left-color: #0d6efd;
+        }
+        .info-card.member {
+            border-left-color: #198754;
+        }
+        .info-card.book {
+            border-left-color: #fd7e14;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-value {
+            font-size: 1.1rem;
+            color: #212529;
+            margin-top: 0.25rem;
+        }
+        .card-header-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'accounts:home' %}">
+                <i class="bi bi-book-fill"></i> Digital Library
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:dashboard' %}">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        {% if request.user.profile.is_librarian %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'books:book_list' %}">
+                                    <i class="bi bi-collection"></i> Manage Books
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'books:add_book' %}">
+                                    <i class="bi bi-plus-circle"></i> Add Book
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'transactions:issue_book' %}">
+                                    <i class="bi bi-arrow-right-circle"></i> Issue Book
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" href="{% url 'transactions:transaction_list' %}">
+                                    <i class="bi bi-clock-history"></i> Transactions
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <span class="nav-link">
+                                    <span class="badge bg-warning text-dark">Librarian</span>
+                                </span>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:logout' %}">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4 mb-4 main-content">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold">
+                    <i class="bi bi-receipt text-primary"></i> Transaction Details
+                </h2>
+                <p class="text-muted mb-0">Transaction ID: #{{ transaction.id }}</p>
+            </div>
+            <a href="{% url 'transactions:transaction_list' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Transactions
+            </a>
+        </div>
+
+        <!-- Django Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-4">
+            <!-- Transaction Information Card -->
+            <div class="col-md-4">
+                <div class="card info-card transaction shadow-sm h-100">
+                    <div class="card-header-custom">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle"></i> Transaction Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Transaction ID -->
+                        <div class="mb-3">
+                            <div class="info-label">Transaction ID</div>
+                            <div class="info-value">
+                                <span class="badge bg-primary" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                    #{{ transaction.id }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-3">
+                            <div class="info-label">Status</div>
+                            <div class="info-value">
+                                {% if transaction.status == 'Borrowed' %}
+                                    <span class="status-badge status-borrowed">
+                                        <i class="bi bi-bookmark"></i> Borrowed
+                                    </span>
+                                {% elif transaction.status == 'Returned' %}
+                                    <span class="status-badge status-returned">
+                                        <i class="bi bi-check-circle"></i> Returned
+                                    </span>
+                                {% elif transaction.status == 'Overdue' %}
+                                    <span class="status-badge status-overdue">
+                                        <i class="bi bi-exclamation-triangle"></i> Overdue
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Issue Date -->
+                        <div class="mb-3">
+                            <div class="info-label">
+                                <i class="bi bi-calendar-check text-success"></i> Issue Date
+                            </div>
+                            <div class="info-value">
+                                {{ transaction.issue_date|date:"F d, Y" }}
+                                <br>
+                                <small class="text-muted">{{ transaction.issue_date|date:"g:i A" }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Due Date -->
+                        <div class="mb-3">
+                            <div class="info-label">
+                                <i class="bi bi-calendar-event text-warning"></i> Due Date
+                            </div>
+                            <div class="info-value">
+                                {{ transaction.due_date|date:"F d, Y" }}
+                                <br>
+                                <small class="text-muted">{{ transaction.due_date|date:"g:i A" }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Return Date -->
+                        <div class="mb-3">
+                            <div class="info-label">
+                                <i class="bi bi-calendar-x text-danger"></i> Return Date
+                            </div>
+                            <div class="info-value">
+                                {% if transaction.return_date %}
+                                    {{ transaction.return_date|date:"F d, Y" }}
+                                    <br>
+                                    <small class="text-muted">{{ transaction.return_date|date:"g:i A" }}</small>
+                                {% else %}
+                                    <span class="text-muted">Not returned yet</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Days Info -->
+                        {% if transaction.status != 'Returned' %}
+                            <hr>
+                            <div class="mb-0">
+                                {% if transaction.status == 'Overdue' %}
+                                    <div class="alert alert-danger mb-0">
+                                        <i class="bi bi-exclamation-triangle-fill"></i>
+                                        <strong>{{ transaction.days_overdue }} day{{ transaction.days_overdue|pluralize }}</strong> overdue
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info mb-0">
+                                        <i class="bi bi-clock-fill"></i>
+                                        <strong>{{ transaction.days_until_due }} day{{ transaction.days_until_due|pluralize }}</strong> remaining
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Member Information Card -->
+            <div class="col-md-4">
+                <div class="card info-card member shadow-sm h-100">
+                    <div class="card-header-custom">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person-circle"></i> Member Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Username -->
+                        <div class="mb-3">
+                            <div class="info-label">
+                                <i class="bi bi-person-badge text-primary"></i> Username
+                            </div>
+                            <div class="info-value">
+                                {{ transaction.member.username }}
+                            </div>
+                        </div>
+
+                        <!-- Full Name -->
+                        <div class="mb-3">
+                            <div class="info-label">
+                                <i class="bi bi-person text-success"></i> Full Name
+                            </div>
+                            <div class="info-value">
+                                {% if transaction.member.first_name or transaction.member.last_name %}
+                                    {{ transaction.member.first_name }} {{ transaction.member.last_name }}
+                                {% else %}
+                                    <span class="text-muted">Not provided</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <div class="info-label">
+                                <i class="bi bi-envelope text-info"></i> Email
+                            </div>
+                            <div class="info-value">
+                                {% if transaction.member.email %}
+                                    <a href="mailto:{{ transaction.member.email }}" class="text-decoration-none">
+                                        {{ transaction.member.email }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Not provided</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Role Badge -->
+                        <div class="mb-0">
+                            <div class="info-label">Role</div>
+                            <div class="info-value">
+                                <span class="badge bg-success" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                                    <i class="bi bi-person-check"></i> {{ transaction.member.profile.role }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Book Information Card -->
+            <div class="col-md-4">
+                <div class="card info-card book shadow-sm h-100">
+                    <div class="card-header-custom">
+                        <h5 class="mb-0">
+                            <i class="bi bi-book"></i> Book Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Book Title -->
+                        <div class="mb-3">
+                            <div class="info-label">
+                                <i class="bi bi-journal-text text-primary"></i> Book Title
+                            </div>
+                            <div class="info-value">
+                                <a href="{% url 'books:book_detail' transaction.book.pk %}" class="text-decoration-none fw-bold">
+                                    {{ transaction.book.title }}
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Author -->
+                        <div class="mb-3">
+                            <div class="info-label">
+                                <i class="bi bi-pen text-success"></i> Author
+                            </div>
+                            <div class="info-value">
+                                {{ transaction.book.author }}
+                            </div>
+                        </div>
+
+                        <!-- ISBN -->
+                        <div class="mb-3">
+                            <div class="info-label">
+                                <i class="bi bi-upc-scan text-info"></i> ISBN
+                            </div>
+                            <div class="info-value">
+                                <code>{{ transaction.book.isbn }}</code>
+                            </div>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="mb-3">
+                            <div class="info-label">
+                                <i class="bi bi-tag text-warning"></i> Category
+                            </div>
+                            <div class="info-value">
+                                <span class="badge bg-warning text-dark" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                                    {{ transaction.book.category }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Current Availability -->
+                        <hr>
+                        <div class="mb-0">
+                            <div class="info-label">Current Availability</div>
+                            <div class="info-value">
+                                <span class="badge {% if transaction.book.available_quantity > 0 %}bg-success{% else %}bg-danger{% endif %}" 
+                                      style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                                    {{ transaction.book.available_quantity }} / {{ transaction.book.quantity }} available
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-gear"></i> Actions
+                </h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'transactions:transaction_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Transactions
+                    </a>
+                    <a href="{% url 'books:book_detail' transaction.book.pk %}" class="btn btn-outline-info">
+                        <i class="bi bi-book"></i> View Book Details
+                    </a>
+                    {% if transaction.status != 'Returned' %}
+                        <button class="btn btn-outline-success" disabled>
+                            <i class="bi bi-arrow-return-left"></i> Return Book (Coming Soon)
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 Digital Library Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
