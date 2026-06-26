@@ -498,7 +498,7 @@
             </form>
             
             <!-- Add Book Button -->
-            {% if user.is_authenticated %}
+            {% if user.is_authenticated and user.profile.is_librarian %}
                 <div class="mt-3">
                     <a href="{% url 'books:add_book' %}" class="btn btn-add-book">
                         <i class="bi bi-plus-circle"></i> Add New Book

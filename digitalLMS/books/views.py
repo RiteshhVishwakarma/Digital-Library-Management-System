@@ -4,11 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Book
 from .forms import BookForm
+from accounts.decorators import librarian_required
 
 
 def book_list(request):
     """
     Display a list of all books with search functionality.
+    Accessible to all users (including non-authenticated).
     """
     # Get search query from GET parameters
     search_query = request.GET.get('q', '').strip()
@@ -34,6 +36,7 @@ def book_list(request):
 def book_detail(request, pk):
     """
     Display details of a specific book.
+    Accessible to all users (including non-authenticated).
     """
     book = get_object_or_404(Book, pk=pk)
     context = {
@@ -42,10 +45,11 @@ def book_detail(request, pk):
     return render(request, 'books/book_detail.html', context)
 
 
-@login_required
+@librarian_required
 def add_book(request):
     """
     Create a new book.
+    Only accessible to librarians.
     """
     if request.method == 'POST':
         form = BookForm(request.POST)
@@ -71,10 +75,11 @@ def add_book(request):
     return render(request, 'books/add_book.html', context)
 
 
-@login_required
+@librarian_required
 def edit_book(request, pk):
     """
     Edit an existing book.
+    Only accessible to librarians.
     """
     book = get_object_or_404(Book, pk=pk)
     
@@ -103,10 +108,11 @@ def edit_book(request, pk):
     return render(request, 'books/edit_book.html', context)
 
 
-@login_required
+@librarian_required
 def delete_book(request, pk):
     """
     Delete a book with confirmation.
+    Only accessible to librarians.
     """
     book = get_object_or_404(Book, pk=pk)
     

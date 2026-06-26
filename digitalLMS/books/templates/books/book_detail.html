@@ -515,7 +515,7 @@
 
                         <!-- Action Buttons -->
                         <div class="action-buttons mt-4">
-                            {% if user.is_authenticated %}
+                            {% if user.is_authenticated and user.profile.is_librarian %}
                                 <a href="{% url 'books:edit_book' book.pk %}" class="btn btn-primary-custom">
                                     <i class="bi bi-pencil-square"></i> Edit Book
                                 </a>
