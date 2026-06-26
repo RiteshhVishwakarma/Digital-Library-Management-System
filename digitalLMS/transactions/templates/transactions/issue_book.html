@@ -1,0 +1,221 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - Digital Library</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'accounts:home' %}">
+                <i class="bi bi-book-fill"></i> Digital Library
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:dashboard' %}">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        {% if request.user.profile.is_librarian %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'books:book_list' %}">
+                                    <i class="bi bi-collection"></i> Manage Books
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'books:add_book' %}">
+                                    <i class="bi bi-plus-circle"></i> Add Book
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" href="{% url 'transactions:issue_book' %}">
+                                    <i class="bi bi-arrow-right-circle"></i> Issue Book
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'transactions:transaction_list' %}">
+                                    <i class="bi bi-clock-history"></i> Transactions
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <span class="nav-link">
+                                    <span class="badge bg-warning text-dark">Librarian</span>
+                                </span>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:logout' %}">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <!-- Page Header -->
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">
+                        <i class="bi bi-arrow-right-circle text-primary"></i> Issue Book
+                    </h2>
+                    <p class="text-muted">Issue a book to a library member</p>
+                </div>
+
+                <!-- Django Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Issue Book Form Card -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-journal-plus"></i> Issue Book Form
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" id="issueBookForm">
+                            {% csrf_token %}
+                            
+                            <!-- Member Selection -->
+                            <div class="mb-4">
+                                <label for="{{ form.member.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-person-fill text-primary"></i> Select Member *
+                                </label>
+                                {{ form.member }}
+                                {% if form.member.help_text %}
+                                    <div class="form-text">{{ form.member.help_text }}</div>
+                                {% endif %}
+                                {% if form.member.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.member.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Book Selection -->
+                            <div class="mb-4">
+                                <label for="{{ form.book.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-book-fill text-primary"></i> Select Book *
+                                </label>
+                                {{ form.book }}
+                                {% if form.book.help_text %}
+                                    <div class="form-text">{{ form.book.help_text }}</div>
+                                {% endif %}
+                                {% if form.book.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.book.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Book Availability Info -->
+                            <div id="book-availability-info" class="alert alert-info" style="display: none;">
+                                <i class="bi bi-info-circle"></i> 
+                                <strong>Available Quantity:</strong> <span id="available-quantity">-</span>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a href="{% url 'accounts:dashboard' %}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Issue Book
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Information Card -->
+                <div class="card mt-4 border-info">
+                    <div class="card-body">
+                        <h6 class="card-title text-info">
+                            <i class="bi bi-lightbulb-fill"></i> Information
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>Books will be issued for 14 days by default</li>
+                            <li>Only members with active accounts can borrow books</li>
+                            <li>Only books with available quantity greater than 0 can be issued</li>
+                            <li>The available quantity will be reduced upon successful issue</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 Digital Library Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript for Book Selection -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bookSelect = document.getElementById('book-select');
+            const availabilityInfo = document.getElementById('book-availability-info');
+            const availableQuantitySpan = document.getElementById('available-quantity');
+
+            if (bookSelect) {
+                bookSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    
+                    if (selectedOption.value) {
+                        // Extract available quantity from the option text
+                        const optionText = selectedOption.text;
+                        const match = optionText.match(/Available:\s*(\d+)/);
+                        
+                        if (match) {
+                            const availableQty = match[1];
+                            availableQuantitySpan.textContent = availableQty;
+                            availabilityInfo.style.display = 'block';
+                            
+                            // Change alert color based on quantity
+                            availabilityInfo.classList.remove('alert-info', 'alert-warning', 'alert-danger');
+                            
+                            if (parseInt(availableQty) > 5) {
+                                availabilityInfo.classList.add('alert-info');
+                            } else if (parseInt(availableQty) > 2) {
+                                availabilityInfo.classList.add('alert-warning');
+                            } else {
+                                availabilityInfo.classList.add('alert-danger');
+                            }
+                        }
+                    } else {
+                        availabilityInfo.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

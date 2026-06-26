@@ -1,0 +1,284 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - Digital Library</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .status-badge {
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            border-radius: 20px;
+        }
+        .status-borrowed {
+            background-color: #0dcaf0;
+            color: #000;
+        }
+        .status-returned {
+            background-color: #198754;
+            color: #fff;
+        }
+        .status-overdue {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .stat-card {
+            border-left: 4px solid;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card.blue {
+            border-left-color: #0d6efd;
+        }
+        .stat-card.green {
+            border-left-color: #198754;
+        }
+        .stat-card.red {
+            border-left-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'accounts:home' %}">
+                <i class="bi bi-book-fill"></i> Digital Library
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:dashboard' %}">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        {% if request.user.profile.is_librarian %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'books:book_list' %}">
+                                    <i class="bi bi-collection"></i> Manage Books
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'books:add_book' %}">
+                                    <i class="bi bi-plus-circle"></i> Add Book
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'transactions:issue_book' %}">
+                                    <i class="bi bi-arrow-right-circle"></i> Issue Book
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" href="{% url 'transactions:transaction_list' %}">
+                                    <i class="bi bi-clock-history"></i> Transactions
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <span class="nav-link">
+                                    <span class="badge bg-warning text-dark">Librarian</span>
+                                </span>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:logout' %}">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold">
+                    <i class="bi bi-clock-history text-primary"></i> Transaction History
+                </h2>
+                <p class="text-muted mb-0">Manage and track all book borrowing transactions</p>
+            </div>
+            <a href="{% url 'transactions:issue_book' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Issue New Book
+            </a>
+        </div>
+
+        <!-- Django Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Statistics Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card stat-card blue shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Total Transactions</h6>
+                                <h3 class="mb-0 fw-bold">{{ total_transactions }}</h3>
+                            </div>
+                            <div class="text-primary" style="font-size: 2.5rem;">
+                                <i class="bi bi-journal-text"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card green shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Active Borrows</h6>
+                                <h3 class="mb-0 fw-bold">{{ active_borrows }}</h3>
+                            </div>
+                            <div class="text-success" style="font-size: 2.5rem;">
+                                <i class="bi bi-bookmark-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card red shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Overdue Books</h6>
+                                <h3 class="mb-0 fw-bold">{{ overdue_count }}</h3>
+                            </div>
+                            <div class="text-danger" style="font-size: 2.5rem;">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-ul"></i> All Transactions
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if transactions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Member</th>
+                                    <th>Book</th>
+                                    <th>Issue Date</th>
+                                    <th>Due Date</th>
+                                    <th>Return Date</th>
+                                    <th>Status</th>
+                                    <th>Days</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions %}
+                                    <tr>
+                                        <td class="fw-bold">#{{ transaction.id }}</td>
+                                        <td>
+                                            <i class="bi bi-person-circle text-primary"></i>
+                                            {{ transaction.member.username }}
+                                        </td>
+                                        <td>
+                                            <i class="bi bi-book text-info"></i>
+                                            {{ transaction.book.title }}
+                                        </td>
+                                        <td>{{ transaction.issue_date|date:"M d, Y" }}</td>
+                                        <td>{{ transaction.due_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if transaction.return_date %}
+                                                {{ transaction.return_date|date:"M d, Y" }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if transaction.status == 'Borrowed' %}
+                                                <span class="status-badge status-borrowed">
+                                                    <i class="bi bi-bookmark"></i> Borrowed
+                                                </span>
+                                            {% elif transaction.status == 'Returned' %}
+                                                <span class="status-badge status-returned">
+                                                    <i class="bi bi-check-circle"></i> Returned
+                                                </span>
+                                            {% elif transaction.status == 'Overdue' %}
+                                                <span class="status-badge status-overdue">
+                                                    <i class="bi bi-exclamation-triangle"></i> Overdue
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if transaction.status == 'Returned' %}
+                                                <span class="text-muted">-</span>
+                                            {% elif transaction.status == 'Overdue' %}
+                                                <span class="text-danger fw-bold">
+                                                    <i class="bi bi-arrow-up-circle"></i> {{ transaction.days_overdue }} overdue
+                                                </span>
+                                            {% else %}
+                                                {% if transaction.days_until_due > 0 %}
+                                                    <span class="text-success">
+                                                        <i class="bi bi-clock"></i> {{ transaction.days_until_due }} left
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-warning">
+                                                        <i class="bi bi-exclamation-circle"></i> Due today
+                                                    </span>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                        <p class="text-muted mt-3">No transactions found</p>
+                        <a href="{% url 'transactions:issue_book' %}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-circle"></i> Issue First Book
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 Digital Library Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
