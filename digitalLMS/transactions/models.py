@@ -15,6 +15,8 @@ class BorrowTransaction(models.Model):
         ('Overdue', 'Overdue'),
     ]
     
+    FINE_RATE_PER_DAY = 10  # ₹10 per day
+    
     member = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -49,6 +51,13 @@ class BorrowTransaction(models.Model):
         choices=STATUS_CHOICES,
         default='Borrowed',
         help_text="Current status of the transaction"
+    )
+    
+    fine_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00,
+        help_text="Fine amount in rupees for late return"
     )
     
     class Meta:
@@ -99,8 +108,35 @@ class BorrowTransaction(models.Model):
     def days_overdue(self):
         """
         Calculate number of days overdue.
+        Returns 0 if not overdue or already returned on time.
         """
-        if self.status == 'Returned' or not self.is_overdue():
+        if self.status == 'Returned':
+            # If returned, check if it was late
+            if self.return_date and self.return_date > self.due_date:
+                delta = self.return_date - self.due_date
+                return delta.days
             return 0
-        delta = timezone.now() - self.due_date
-        return delta.days
+        
+        # If not returned yet, check current overdue days
+        if self.is_overdue():
+            delta = timezone.now() - self.due_date
+            return delta.days
+        return 0
+    
+    def calculate_fine(self):
+        """
+        Calculate fine amount based on overdue days.
+        Returns the fine amount as Decimal.
+        """
+        from decimal import Decimal
+        
+        overdue_days = self.days_overdue()
+        if overdue_days > 0:
+            return Decimal(overdue_days) * Decimal(self.FINE_RATE_PER_DAY)
+        return Decimal('0.00')
+    
+    def get_fine_display(self):
+        """
+        Get formatted fine amount for display.
+        """
+        return f"₹{self.fine_amount:.2f}"

@@ -245,6 +245,30 @@
                             <strong>Important:</strong> This action will mark the book as returned and update the inventory. This action cannot be undone.
                         </div>
 
+                        <!-- Fine Information -->
+                        {% if overdue_days > 0 %}
+                            <div class="alert alert-danger mb-4">
+                                <h6 class="alert-heading">
+                                    <i class="bi bi-cash-coin"></i> Late Return Fine
+                                </h6>
+                                <p class="mb-2">
+                                    This book is <strong>{{ overdue_days }} day{{ overdue_days|pluralize }}</strong> overdue.
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Fine Rate:</strong> ₹10 per day
+                                </p>
+                                <hr>
+                                <h5 class="mb-0 text-danger">
+                                    <strong>Total Fine: ₹{{ potential_fine }}</strong>
+                                </h5>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-success mb-4">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <strong>On-Time Return:</strong> No fine will be applied for this return.
+                            </div>
+                        {% endif %}
+
                         <!-- Action Buttons -->
                         <form method="POST">
                             {% csrf_token %}

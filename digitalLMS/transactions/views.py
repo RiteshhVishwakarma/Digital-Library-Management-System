@@ -167,6 +167,7 @@ def transaction_detail(request, pk):
 def return_book(request, pk):
     """
     Return a borrowed book with confirmation.
+    Calculates fine for late returns.
     Only accessible to librarians.
     """
     transaction_obj = get_object_or_404(
@@ -190,7 +191,21 @@ def return_book(request, pk):
             with transaction.atomic():
                 # Set return date to current time
                 transaction_obj.return_date = timezone.now()
-                transaction_obj.status = 'Returned'
+                
+                # Calculate fine if returned late
+                if transaction_obj.return_date > transaction_obj.due_date:
+                    # Book returned late - calculate fine
+                    overdue_days = (transaction_obj.return_date - transaction_obj.due_date).days
+                    transaction_obj.fine_amount = transaction_obj.calculate_fine()
+                    transaction_obj.status = 'Returned'  # Still mark as returned, but with fine
+                    
+                    fine_message = f' A fine of ₹{transaction_obj.fine_amount:.2f} has been applied for {overdue_days} day(s) late return.'
+                else:
+                    # Book returned on time
+                    transaction_obj.fine_amount = 0.00
+                    transaction_obj.status = 'Returned'
+                    fine_message = ' No fine applied - returned on time.'
+                
                 transaction_obj.save()
                 
                 # Increase book's available quantity
@@ -200,7 +215,7 @@ def return_book(request, pk):
                 
                 messages.success(
                     request,
-                    f'Successfully returned "{book.title}". '
+                    f'Successfully returned "{book.title}".{fine_message} '
                     f'Available quantity updated to {book.available_quantity}/{book.quantity}.'
                 )
                 return redirect('transactions:transaction_list')
@@ -212,9 +227,15 @@ def return_book(request, pk):
             )
             return redirect('transactions:transaction_detail', pk=pk)
     
-    # GET request - show confirmation page
+    # GET request - show confirmation page with fine preview
+    # Calculate potential fine
+    potential_fine = transaction_obj.calculate_fine()
+    overdue_days = transaction_obj.days_overdue()
+    
     context = {
         'transaction': transaction_obj,
+        'potential_fine': potential_fine,
+        'overdue_days': overdue_days,
         'page_title': 'Return Book Confirmation'
     }
     return render(request, 'transactions/return_book.html', context)

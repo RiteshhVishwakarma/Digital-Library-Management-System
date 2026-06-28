@@ -15,6 +15,7 @@ class BorrowTransactionAdmin(admin.ModelAdmin):
         'due_date',
         'return_date',
         'status',
+        'fine_amount',
         'is_overdue'
     ]
     
@@ -46,6 +47,9 @@ class BorrowTransactionAdmin(admin.ModelAdmin):
         }),
         ('Dates', {
             'fields': ('issue_date', 'due_date', 'return_date')
+        }),
+        ('Financial Information', {
+            'fields': ('fine_amount',)
         }),
         ('Status Information', {
             'fields': ('is_overdue', 'days_until_due', 'days_overdue')

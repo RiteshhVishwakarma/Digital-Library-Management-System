@@ -22,6 +22,8 @@ def dashboard(request):
     # Get user's borrow statistics
     if request.user.profile.is_member():
         # Member statistics
+        from django.db.models import Sum
+        
         total_borrowed = BorrowTransaction.objects.filter(member=request.user).count()
         active_loans = BorrowTransaction.objects.filter(
             member=request.user,
@@ -36,6 +38,12 @@ def dashboard(request):
             status='Returned'
         ).count()
         
+        # Calculate total fines paid by member
+        total_fines = BorrowTransaction.objects.filter(
+            member=request.user,
+            fine_amount__gt=0
+        ).aggregate(total=Sum('fine_amount'))['total'] or 0
+        
         # Get recent borrowed books (latest 5)
         recent_transactions = BorrowTransaction.objects.filter(
             member=request.user
@@ -46,20 +54,29 @@ def dashboard(request):
             'active_loans': active_loans,
             'overdue_books': overdue_books,
             'returned_books': returned_books,
+            'total_fines': total_fines,
             'recent_transactions': recent_transactions,
         }
     else:
         # Librarian statistics
+        from django.db.models import Sum
+        
         total_transactions = BorrowTransaction.objects.count()
         active_borrows = BorrowTransaction.objects.filter(status='Borrowed').count()
         overdue_count = BorrowTransaction.objects.filter(status='Overdue').count()
         total_returned = BorrowTransaction.objects.filter(status='Returned').count()
+        
+        # Calculate total fines collected
+        total_fines_collected = BorrowTransaction.objects.filter(
+            fine_amount__gt=0
+        ).aggregate(total=Sum('fine_amount'))['total'] or 0
         
         context = {
             'total_transactions': total_transactions,
             'active_borrows': active_borrows,
             'overdue_count': overdue_count,
             'total_returned': total_returned,
+            'total_fines_collected': total_fines_collected,
         }
     
     return render(request, 'accounts/dashboard.html', context)

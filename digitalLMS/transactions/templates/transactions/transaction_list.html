@@ -303,6 +303,7 @@
                                     <th>Return Date</th>
                                     <th>Status</th>
                                     <th>Days</th>
+                                    <th>Fine</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -359,6 +360,15 @@
                                                         <i class="bi bi-exclamation-circle"></i> Due today
                                                     </span>
                                                 {% endif %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if transaction.fine_amount > 0 %}
+                                                <span class="badge bg-danger" style="font-size: 0.9rem;">
+                                                    ₹{{ transaction.fine_amount }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">₹0.00</span>
                                             {% endif %}
                                         </td>
                                         <td onclick="event.stopPropagation();">

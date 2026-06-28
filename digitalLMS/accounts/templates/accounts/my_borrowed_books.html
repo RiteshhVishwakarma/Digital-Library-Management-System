@@ -170,6 +170,7 @@
                                     <th>Due Date</th>
                                     <th>Status</th>
                                     <th>Days</th>
+                                    <th>Fine</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -210,6 +211,15 @@
                                                 {% endif %}
                                             {% endif %}
                                         </td>
+                                        <td>
+                                            {% if transaction.status == 'Overdue' %}
+                                                <span class="badge bg-danger">
+                                                    ₹{{ transaction.calculate_fine }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">₹0.00</span>
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -246,6 +256,7 @@
                                     <th>Due Date</th>
                                     <th>Return Date</th>
                                     <th>Status</th>
+                                    <th>Fine</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -263,6 +274,15 @@
                                             <span class="status-badge status-returned">
                                                 <i class="bi bi-check-circle"></i> Returned
                                             </span>
+                                        </td>
+                                        <td>
+                                            {% if transaction.fine_amount > 0 %}
+                                                <span class="badge bg-danger" style="font-size: 0.9rem;">
+                                                    ₹{{ transaction.fine_amount }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-success">₹0.00</span>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                 {% endfor %}
