@@ -362,9 +362,14 @@
                                             {% endif %}
                                         </td>
                                         <td onclick="event.stopPropagation();">
-                                            <a href="{% url 'transactions:transaction_detail' transaction.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <a href="{% url 'transactions:transaction_detail' transaction.pk %}" class="btn btn-sm btn-outline-primary me-1">
                                                 <i class="bi bi-eye"></i> View
                                             </a>
+                                            {% if transaction.status == 'Borrowed' or transaction.status == 'Overdue' %}
+                                                <a href="{% url 'transactions:return_book' transaction.pk %}" class="btn btn-sm btn-success">
+                                                    <i class="bi bi-arrow-return-left"></i> Return
+                                                </a>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                 {% endfor %}

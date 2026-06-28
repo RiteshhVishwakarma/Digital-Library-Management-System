@@ -515,12 +515,28 @@
 
                         <!-- Action Buttons -->
                         <div class="action-buttons mt-4">
-                            {% if user.is_authenticated and user.profile.is_librarian %}
-                                <a href="{% url 'books:edit_book' book.pk %}" class="btn btn-primary-custom">
-                                    <i class="bi bi-pencil-square"></i> Edit Book
-                                </a>
-                                <a href="{% url 'books:delete_book' book.pk %}" class="btn btn-danger-custom">
-                                    <i class="bi bi-trash"></i> Delete Book
+                            {% if user.is_authenticated %}
+                                {% if user.profile.is_librarian %}
+                                    <a href="{% url 'books:edit_book' book.pk %}" class="btn btn-primary-custom">
+                                        <i class="bi bi-pencil-square"></i> Edit Book
+                                    </a>
+                                    <a href="{% url 'books:delete_book' book.pk %}" class="btn btn-danger-custom">
+                                        <i class="bi bi-trash"></i> Delete Book
+                                    </a>
+                                {% elif user.profile.is_member %}
+                                    {% if book.available_quantity > 0 %}
+                                        <a href="{% url 'transactions:borrow_book' book.pk %}" class="btn btn-primary-custom">
+                                            <i class="bi bi-bookmark-plus"></i> Borrow This Book
+                                        </a>
+                                    {% else %}
+                                        <button class="btn btn-primary-custom" disabled>
+                                            <i class="bi bi-x-circle"></i> Currently Unavailable
+                                        </button>
+                                    {% endif %}
+                                {% endif %}
+                            {% else %}
+                                <a href="{% url 'accounts:login' %}" class="btn btn-primary-custom">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login to Borrow
                                 </a>
                             {% endif %}
                             <a href="{% url 'books:book_list' %}" class="btn btn-secondary-custom">

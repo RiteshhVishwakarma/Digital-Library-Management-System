@@ -270,7 +270,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#">
+                                <a class="nav-link" href="{% url 'accounts:my_borrowed_books' %}">
                                     <i class="bi bi-bookmarks"></i> My Borrowed Books
                                 </a>
                             </li>
@@ -288,7 +288,8 @@
                                 <i class="bi bi-box-arrow-right"></i> Logout
                             </a>
                         </li>
-                    {% else %}
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </nav>
@@ -319,53 +320,100 @@
         <!-- Statistics Cards -->
         <div class="stats-container">
             <div class="row g-4">
-                <!-- Total Borrowed Books -->
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon blue">
-                            <i class="bi bi-book"></i>
+                {% if user.profile.is_member %}
+                    <!-- Total Borrowed Books -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <i class="bi bi-book"></i>
+                            </div>
+                            <div class="stat-number">{{ total_borrowed }}</div>
+                            <div class="stat-label">Total Borrowed Books</div>
+                            <div class="stat-description">Books you've borrowed so far</div>
                         </div>
-                        <div class="stat-number">0</div>
-                        <div class="stat-label">Total Borrowed Books</div>
-                        <div class="stat-description">Books you've borrowed so far</div>
                     </div>
-                </div>
 
-                <!-- Active Loans -->
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon green">
-                            <i class="bi bi-bookmark-check"></i>
+                    <!-- Active Loans -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <i class="bi bi-bookmark-check"></i>
+                            </div>
+                            <div class="stat-number">{{ active_loans }}</div>
+                            <div class="stat-label">Active Loans</div>
+                            <div class="stat-description">Currently borrowed books</div>
                         </div>
-                        <div class="stat-number">0</div>
-                        <div class="stat-label">Active Loans</div>
-                        <div class="stat-description">Currently borrowed books</div>
                     </div>
-                </div>
 
-                <!-- Overdue Books -->
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon orange">
-                            <i class="bi bi-exclamation-triangle"></i>
+                    <!-- Overdue Books -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card">
+                            <div class="stat-icon orange">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-number">{{ overdue_books }}</div>
+                            <div class="stat-label">Overdue Books</div>
+                            <div class="stat-description">Books past due date</div>
                         </div>
-                        <div class="stat-number">0</div>
-                        <div class="stat-label">Overdue Books</div>
-                        <div class="stat-description">Books past due date</div>
                     </div>
-                </div>
 
-                <!-- Reserved Books -->
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon purple">
-                            <i class="bi bi-bookmark-star"></i>
+                    <!-- Returned Books -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card">
+                            <div class="stat-icon purple">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div class="stat-number">{{ returned_books }}</div>
+                            <div class="stat-label">Returned Books</div>
+                            <div class="stat-description">Books returned successfully</div>
                         </div>
-                        <div class="stat-number">0</div>
-                        <div class="stat-label">Reserved Books</div>
-                        <div class="stat-description">Books on hold for you</div>
                     </div>
-                </div>
+                {% else %}
+                    <!-- Librarian Statistics -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <i class="bi bi-journal-text"></i>
+                            </div>
+                            <div class="stat-number">{{ total_transactions }}</div>
+                            <div class="stat-label">Total Transactions</div>
+                            <div class="stat-description">All borrow transactions</div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <i class="bi bi-bookmark-check"></i>
+                            </div>
+                            <div class="stat-number">{{ active_borrows }}</div>
+                            <div class="stat-label">Active Borrows</div>
+                            <div class="stat-description">Currently borrowed books</div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card">
+                            <div class="stat-icon orange">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-number">{{ overdue_count }}</div>
+                            <div class="stat-label">Overdue Books</div>
+                            <div class="stat-description">Books past due date</div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <div class="stat-card">
+                            <div class="stat-icon purple">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div class="stat-number">{{ total_returned }}</div>
+                            <div class="stat-label">Returned Books</div>
+                            <div class="stat-description">Successfully returned</div>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
@@ -393,27 +441,78 @@
                     <a href="{% url 'books:book_list' %}" class="action-btn">
                         <i class="bi bi-search"></i> Browse Books
                     </a>
-                    <a href="#" class="action-btn">
+                    <a href="{% url 'accounts:my_borrowed_books' %}" class="action-btn">
                         <i class="bi bi-book"></i> My Books
                     </a>
-                    <a href="#" class="action-btn">
+                    <a href="{% url 'accounts:my_borrowed_books' %}" class="action-btn">
                         <i class="bi bi-clock-history"></i> Borrowing History
-                    </a>
-                    <a href="#" class="action-btn">
-                        <i class="bi bi-bookmark"></i> My Reservations
                     </a>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Recent Activity (Placeholder) -->
+        <!-- Recent Activity -->
         <div class="quick-actions">
-            <h3><i class="bi bi-activity"></i> Recent Activity</h3>
-            <div class="text-center py-5">
-                <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
-                <p class="text-muted mt-3">No recent activity to display</p>
-                <p class="text-muted small">Your borrowing history and activity will appear here</p>
-            </div>
+            <h3><i class="bi bi-activity"></i> Recent Borrowed Books</h3>
+            {% if user.profile.is_member %}
+                {% if recent_transactions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th>Issue Date</th>
+                                    <th>Due Date</th>
+                                    <th>Return Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in recent_transactions %}
+                                    <tr>
+                                        <td>
+                                            <i class="bi bi-book text-primary"></i>
+                                            <strong>{{ transaction.book.title }}</strong>
+                                        </td>
+                                        <td>{{ transaction.issue_date|date:"M d, Y" }}</td>
+                                        <td>{{ transaction.due_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if transaction.return_date %}
+                                                {{ transaction.return_date|date:"M d, Y" }}
+                                            {% else %}
+                                                <span class="text-muted">Not returned</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if transaction.status == 'Borrowed' %}
+                                                <span class="badge bg-info">Borrowed</span>
+                                            {% elif transaction.status == 'Returned' %}
+                                                <span class="badge bg-success">Returned</span>
+                                            {% elif transaction.status == 'Overdue' %}
+                                                <span class="badge bg-danger">Overdue</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                        <p class="text-muted mt-3">You haven't borrowed any books yet</p>
+                        <a href="{% url 'books:book_list' %}" class="btn btn-primary mt-2">
+                            <i class="bi bi-search"></i> Browse Books
+                        </a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-speedometer2" style="font-size: 4rem; color: #dee2e6;"></i>
+                    <p class="text-muted mt-3">Librarian Dashboard</p>
+                    <p class="text-muted small">View detailed reports in the Transactions section</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 

@@ -1,0 +1,221 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - Digital Library</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .main-content {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+        .confirmation-card {
+            border: 2px solid #0d6efd;
+            border-radius: 15px;
+        }
+        .info-row {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        .info-value {
+            font-size: 1rem;
+            color: #212529;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'accounts:home' %}">
+                <i class="bi bi-book-fill"></i> Digital Library
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:dashboard' %}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'books:book_list' %}">
+                            <i class="bi bi-book"></i> Books
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:logout' %}">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-5 mb-5 main-content">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <!-- Page Header -->
+                <div class="text-center mb-4">
+                    <div class="mb-3">
+                        <i class="bi bi-bookmark-plus text-primary" style="font-size: 4rem;"></i>
+                    </div>
+                    <h2 class="fw-bold text-primary">Confirm Book Borrow</h2>
+                    <p class="text-muted">Please review the details before borrowing</p>
+                </div>
+
+                <!-- Django Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Confirmation Card -->
+                <div class="card confirmation-card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle"></i> Borrow Details
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Book Information -->
+                        <div class="mb-4">
+                            <h6 class="text-uppercase text-muted mb-3">
+                                <i class="bi bi-book"></i> Book Information
+                            </h6>
+                            
+                            <div class="info-row">
+                                <div class="info-label">Book Title</div>
+                                <div class="info-value fw-bold">{{ book.title }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Author</div>
+                                <div class="info-value">{{ book.author }}</div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">ISBN</div>
+                                <div class="info-value"><code>{{ book.isbn }}</code></div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Category</div>
+                                <div class="info-value">
+                                    <span class="badge bg-info">{{ book.category }}</span>
+                                </div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Available Copies</div>
+                                <div class="info-value">
+                                    <span class="badge bg-success">{{ book.available_quantity }} / {{ book.quantity }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Borrowing Terms -->
+                        <div class="mb-4">
+                            <h6 class="text-uppercase text-muted mb-3">
+                                <i class="bi bi-calendar-check"></i> Borrowing Terms
+                            </h6>
+                            
+                            <div class="info-row">
+                                <div class="info-label">Borrow Date</div>
+                                <div class="info-value">
+                                    <span class="text-success fw-bold">Today ({% now "F d, Y" %})</span>
+                                </div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info-label">Due Date</div>
+                                <div class="info-value">
+                                    <span class="text-warning fw-bold">14 days from today</span>
+                                    <small class="text-muted">(Please return within 14 days)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Important Notes -->
+                        <div class="alert alert-info mb-4">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-info-circle-fill"></i> Important Notes
+                            </h6>
+                            <ul class="mb-0 small">
+                                <li>You have <strong>14 days</strong> to return this book</li>
+                                <li>Late returns may result in penalties</li>
+                                <li>You can only borrow one copy of each book at a time</li>
+                                <li>Take good care of the book during your borrowing period</li>
+                            </ul>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-check-circle"></i> Confirm Borrow
+                                </button>
+                                <a href="{% url 'books:book_detail' book.pk %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Help Text -->
+                <div class="text-center mt-4">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i> 
+                        By confirming, you agree to return the book within 14 days.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 Digital Library Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -409,10 +409,10 @@
                     <a href="{% url 'books:book_detail' transaction.book.pk %}" class="btn btn-outline-info">
                         <i class="bi bi-book"></i> View Book Details
                     </a>
-                    {% if transaction.status != 'Returned' %}
-                        <button class="btn btn-outline-success" disabled>
-                            <i class="bi bi-arrow-return-left"></i> Return Book (Coming Soon)
-                        </button>
+                    {% if transaction.status == 'Borrowed' or transaction.status == 'Overdue' %}
+                        <a href="{% url 'transactions:return_book' transaction.pk %}" class="btn btn-success">
+                            <i class="bi bi-arrow-return-left"></i> Return Book
+                        </a>
                     {% endif %}
                 </div>
             </div>

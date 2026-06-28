@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Borrowed Books - Digital Library</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        .main-content {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+        .status-badge {
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            border-radius: 20px;
+        }
+        .status-borrowed {
+            background-color: #0dcaf0;
+            color: #000;
+        }
+        .status-returned {
+            background-color: #198754;
+            color: #fff;
+        }
+        .status-overdue {
+            background-color: #dc3545;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'accounts:home' %}">
+                <i class="bi bi-book-fill"></i> Digital Library
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:home' %}">
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:dashboard' %}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'books:book_list' %}">
+                            <i class="bi bi-book"></i> Books
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'accounts:my_borrowed_books' %}">
+                            <i class="bi bi-bookmarks"></i> My Borrowed Books
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-link">
+                            <i class="bi bi-person-circle"></i> {{ request.user.username }}
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:logout' %}">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4 mb-4 main-content">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold">
+                    <i class="bi bi-bookmarks text-primary"></i> My Borrowed Books
+                </h2>
+                <p class="text-muted mb-0">View your borrowing history and current books</p>
+            </div>
+            <a href="{% url 'books:book_list' %}" class="btn btn-primary">
+                <i class="bi bi-search"></i> Browse More Books
+            </a>
+        </div>
+
+        <!-- Django Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Statistics Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-info">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Currently Borrowed</h6>
+                                <h3 class="mb-0 fw-bold text-info">{{ borrowed_count }}</h3>
+                            </div>
+                            <div class="text-info" style="font-size: 2.5rem;">
+                                <i class="bi bi-bookmark-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm border-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Successfully Returned</h6>
+                                <h3 class="mb-0 fw-bold text-success">{{ returned_count }}</h3>
+                            </div>
+                            <div class="text-success" style="font-size: 2.5rem;">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Currently Borrowed Books -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-bookmark-fill"></i> Currently Borrowed Books
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if borrowed_books %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th>Author</th>
+                                    <th>Issue Date</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Days</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in borrowed_books %}
+                                    <tr>
+                                        <td>
+                                            <i class="bi bi-book text-primary"></i>
+                                            <strong>{{ transaction.book.title }}</strong>
+                                        </td>
+                                        <td>{{ transaction.book.author }}</td>
+                                        <td>{{ transaction.issue_date|date:"M d, Y" }}</td>
+                                        <td>{{ transaction.due_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if transaction.status == 'Borrowed' %}
+                                                <span class="status-badge status-borrowed">
+                                                    <i class="bi bi-bookmark"></i> Borrowed
+                                                </span>
+                                            {% elif transaction.status == 'Overdue' %}
+                                                <span class="status-badge status-overdue">
+                                                    <i class="bi bi-exclamation-triangle"></i> Overdue
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if transaction.status == 'Overdue' %}
+                                                <span class="text-danger fw-bold">
+                                                    <i class="bi bi-arrow-up-circle"></i> {{ transaction.days_overdue }} days overdue
+                                                </span>
+                                            {% else %}
+                                                {% if transaction.days_until_due > 0 %}
+                                                    <span class="text-success">
+                                                        <i class="bi bi-clock"></i> {{ transaction.days_until_due }} days left
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-warning">
+                                                        <i class="bi bi-exclamation-circle"></i> Due today
+                                                    </span>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                        <p class="text-muted mt-3">You don't have any borrowed books currently</p>
+                        <a href="{% url 'books:book_list' %}" class="btn btn-primary mt-2">
+                            <i class="bi bi-search"></i> Browse Books
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Returned Books History -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> Returned Books History
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if returned_books %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Book Title</th>
+                                    <th>Author</th>
+                                    <th>Issue Date</th>
+                                    <th>Due Date</th>
+                                    <th>Return Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in returned_books %}
+                                    <tr>
+                                        <td>
+                                            <i class="bi bi-book text-success"></i>
+                                            {{ transaction.book.title }}
+                                        </td>
+                                        <td>{{ transaction.book.author }}</td>
+                                        <td>{{ transaction.issue_date|date:"M d, Y" }}</td>
+                                        <td>{{ transaction.due_date|date:"M d, Y" }}</td>
+                                        <td>{{ transaction.return_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            <span class="status-badge status-returned">
+                                                <i class="bi bi-check-circle"></i> Returned
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                        <p class="text-muted mt-3">No returned books in your history</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Information Card -->
+        <div class="card mt-4 border-info">
+            <div class="card-body">
+                <h6 class="card-title text-info">
+                    <i class="bi bi-info-circle-fill"></i> How to Return Books
+                </h6>
+                <p class="mb-0 small">
+                    To return a book, please visit the library and hand it to a librarian. 
+                    The librarian will process the return and update the system.
+                    Please return books on or before the due date to avoid penalties.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 Digital Library Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
