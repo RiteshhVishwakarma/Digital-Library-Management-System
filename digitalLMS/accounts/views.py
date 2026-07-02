@@ -59,9 +59,20 @@ def dashboard(request):
         }
     else:
         # Librarian statistics
-        from django.db.models import Sum
+        from django.db.models import Sum, Count
+        from django.contrib.auth.models import User
+        from books.models import Book
         
-        total_transactions = BorrowTransaction.objects.count()
+        # Book statistics
+        total_books = Book.objects.count()
+        total_book_copies = Book.objects.aggregate(total=Sum('quantity'))['total'] or 0
+        available_books = Book.objects.aggregate(total=Sum('available_quantity'))['total'] or 0
+        
+        # Member statistics
+        total_members = User.objects.filter(profile__role='Member').count()
+        
+        # Transaction statistics
+        total_issued = BorrowTransaction.objects.count()
         active_borrows = BorrowTransaction.objects.filter(status='Borrowed').count()
         overdue_count = BorrowTransaction.objects.filter(status='Overdue').count()
         total_returned = BorrowTransaction.objects.filter(status='Returned').count()
@@ -71,12 +82,26 @@ def dashboard(request):
             fine_amount__gt=0
         ).aggregate(total=Sum('fine_amount'))['total'] or 0
         
+        # Get recent transactions (latest 10)
+        recent_transactions = BorrowTransaction.objects.select_related(
+            'member', 'book'
+        ).order_by('-issue_date')[:10]
+        
+        # Get top 5 most borrowed books using Count annotation
+        top_borrowed_books = Book.objects.annotate(
+            borrow_count=Count('borrow_transactions')
+        ).filter(borrow_count__gt=0).order_by('-borrow_count')[:5]
+        
         context = {
-            'total_transactions': total_transactions,
-            'active_borrows': active_borrows,
-            'overdue_count': overdue_count,
+            'total_books': total_books,
+            'total_members': total_members,
+            'total_issued': total_issued,
+            'available_books': available_books,
             'total_returned': total_returned,
+            'overdue_count': overdue_count,
             'total_fines_collected': total_fines_collected,
+            'recent_transactions': recent_transactions,
+            'top_borrowed_books': top_borrowed_books,
         }
     
     return render(request, 'accounts/dashboard.html', context)

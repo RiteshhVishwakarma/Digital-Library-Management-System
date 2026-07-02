@@ -1,5 +1,5 @@
 from django import forms
-from .models import Book
+from .models import Book, Category
 
 
 class BookForm(forms.ModelForm):
@@ -30,9 +30,8 @@ class BookForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Enter 13-digit ISBN'
             }),
-            'category': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'e.g., Programming, Science, History'
+            'category': forms.Select(attrs={
+                'class': 'form-select',
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',

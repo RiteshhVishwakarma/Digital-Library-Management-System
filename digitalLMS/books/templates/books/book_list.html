@@ -476,25 +476,50 @@
     <div class="container mb-4">
         <div class="search-section">
             <form method="GET" action="{% url 'books:book_list' %}" class="search-form">
-                <div class="search-input-wrapper">
-                    <i class="bi bi-search search-icon"></i>
-                    <input 
-                        type="text" 
-                        name="q" 
-                        class="form-control search-input" 
-                        placeholder="Search by title or author..." 
-                        value="{{ search_query }}"
-                        autocomplete="off"
-                    >
-                    {% if search_query %}
-                        <a href="{% url 'books:book_list' %}" class="clear-search" title="Clear search">
-                            <i class="bi bi-x-circle-fill"></i>
+                <div class="row g-2 mb-3">
+                    <!-- Search Input -->
+                    <div class="col-md-8">
+                        <div class="search-input-wrapper">
+                            <i class="bi bi-search search-icon"></i>
+                            <input 
+                                type="text" 
+                                name="q" 
+                                class="form-control search-input" 
+                                placeholder="Search by title, author, or ISBN..." 
+                                value="{{ search_query }}"
+                                autocomplete="off"
+                            >
+                            {% if search_query %}
+                                <a href="{% url 'books:book_list' %}" class="clear-search" title="Clear search">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Category Filter -->
+                    <div class="col-md-4">
+                        <select name="category" class="form-select" style="height: 100%;">
+                            <option value="">All Categories</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ cat.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-search">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    {% if search_query or category_filter %}
+                        <a href="{% url 'books:book_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Clear Filters
                         </a>
                     {% endif %}
                 </div>
-                <button type="submit" class="btn btn-search">
-                    <i class="bi bi-search"></i> Search
-                </button>
             </form>
             
             <!-- Add Book Button -->
@@ -507,7 +532,6 @@
             {% endif %}
         </div>
     </div>
-
     <!-- Django Messages -->
     {% if messages %}
         <div class="container mb-4">

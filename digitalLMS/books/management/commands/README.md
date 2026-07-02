@@ -4,7 +4,43 @@ This directory contains custom Django management commands for managing book data
 
 ## Available Commands
 
-### 1. seed_books
+### 1. seed_categories
+
+Seeds the database with default book categories.
+
+**Usage:**
+```bash
+python manage.py seed_categories
+```
+
+**Default Categories:**
+- Programming
+- Fiction
+- Science
+- History
+- Biography
+- Technology
+
+**Features:**
+- Creates categories if they don't exist
+- Skips categories that already exist
+- Provides detailed output showing what was created vs. what already existed
+- Safe to run multiple times (won't create duplicates)
+
+**Sample Output:**
+```
+Seeding categories...
+✓ Created category: Programming
+✓ Created category: Fiction
+- Category already exists: Science
+============================================================
+Summary: 2 created, 1 already existed
+Successfully seeded 2 new categories!
+```
+
+---
+
+### 2. seed_books
 
 Seeds the database with 15 sample books for development and testing purposes.
 
@@ -42,7 +78,7 @@ Starting book seeding process...
 
 ---
 
-### 2. clear_books
+### 3. clear_books
 
 Deletes all books from the database. Use with caution!
 
@@ -87,7 +123,10 @@ Deleting books...
 
 ### Initial Setup
 ```bash
-# Seed the database with sample data
+# 1. Seed categories first
+python manage.py seed_categories
+
+# 2. Seed the database with sample books
 python manage.py seed_books
 ```
 
